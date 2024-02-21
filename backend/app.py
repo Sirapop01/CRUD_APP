@@ -18,7 +18,7 @@ def hello_world():
 def get_all_products():
     return jsonify(products),200
 
-@app.route("/products",medthods = ["POST"])
+@app.route("/products",methods = ["POST"])
 def create_product():
     data = request.get_json()
     new_pdt={
