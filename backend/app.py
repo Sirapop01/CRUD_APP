@@ -13,7 +13,6 @@ db = client["products"]
 collection = db["pdt_info"]
 
 
-
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
@@ -41,7 +40,6 @@ def update_product(pdt_id):
     if not collection.find_one({"_id": pdt_id}):
         return jsonify({'error': f'Record with ID {pdt_id} does not exist'}), 404
 
-    # Exclude the _id field from the update operation
     data.pop('_id', None)
 
     filter_criteria = {"_id": pdt_id}
@@ -54,8 +52,15 @@ def update_product(pdt_id):
     }), 200
 
 
-@app.route("/products",methods=["Delete"])
-def delete_product():
-    return
+@app.route("/products/<int:pdt_id>", methods=["DELETE"])
+def delete_product(pdt_id):
+    existing_product = collection.find_one({"_id": pdt_id})
+    if existing_product:
+        result = collection.delete_one({"_id": pdt_id})
+        return jsonify({
+            'message': f'Deleted product with ID {pdt_id} successfully',
+        }), 200
+    else:
+        return jsonify({'error': f'Record with ID {pdt_id} does not exist'}), 404
 if __name__ == "__main__":
     app.run(host="0.0.0.0",port=5000,debug=True)

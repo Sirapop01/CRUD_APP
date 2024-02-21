@@ -35,8 +35,18 @@ export default function Product() {
   };
 
   const handleAddProduct = () => {
+
+    const parsedId = parseInt(newProduct._id, 10);
+    const parsedPrice = parseInt(newProduct.price, 10);
+
+    const productToAdd = {
+      ...newProduct,
+      _id: parsedId,
+      price: parsedPrice,
+    };
+
     axios
-      .post("http://127.0.0.1:5000/products", newProduct)
+      .post("http://127.0.0.1:5000/products", productToAdd)
       .then((response) => {
         console.log("Product added successfully:", response.data);
 
@@ -60,24 +70,33 @@ export default function Product() {
   };
 
   const handleUpdateProduct = () => {
-    // Check if _id is provided
+
     if (!newProduct._id) {
       console.error("Please provide _id for updating the product.");
       return;
     }
 
+    const parsedId = parseInt(newProduct._id, 10);
+    const parsedPrice = parseInt(newProduct.price, 10);
+
+    const productToUpdate = {
+      ...newProduct,
+      _id: parsedId,
+      price: parsedPrice,
+    };
+
     axios
-      .put(`http://127.0.0.1:5000/products/${newProduct._id}`, newProduct)
+      .put(`http://127.0.0.1:5000/products/${parsedId}`, productToUpdate)
       .then((response) => {
         console.log("Product updated successfully:", response.data);
-        // Fetch the updated product list after updating a product
+
         axios
           .get("http://127.0.0.1:5000/products")
           .then((response) => setProduct(response.data))
           .catch((error) => {
             console.error("Error fetching data:", error);
           });
-        // Reset input fields to default values
+          
         setNewProduct({
           _id: "",
           name: "",
@@ -87,6 +106,37 @@ export default function Product() {
       })
       .catch((error) => {
         console.error("Error updating product:", error);
+      });
+  };
+
+  const handleDeleteProduct = () => {
+    if (!newProduct._id) {
+      console.error("Please provide _id for deleting the product.");
+      return;
+    }
+
+    const parsedId = parseInt(newProduct._id, 10)
+    axios
+      .delete(`http://127.0.0.1:5000/products/${parsedId}`)
+      .then((response) => {
+        console.log("Product deleted successfully:", response.data);
+        
+        axios
+          .get("http://127.0.0.1:5000/products")
+          .then((response) => setProduct(response.data))
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+          });
+        
+        setNewProduct({
+          _id: "",
+          name: "",
+          price: "",
+          img: "",
+        });
+      })
+      .catch((error) => {
+        console.error("Error deleting product:", error);
       });
   };
 
@@ -146,7 +196,9 @@ export default function Product() {
             <button className="event-button" onClick={handleAddProduct}>
               Add
             </button>
-            <button className="event-button">Delete</button>
+            <button className="event-button" onClick={handleDeleteProduct}>
+              Delete
+            </button>
             <button className="event-button" onClick={handleUpdateProduct}>
               Update
             </button>
