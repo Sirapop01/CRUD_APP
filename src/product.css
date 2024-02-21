@@ -1,0 +1,21 @@
+.product-container{
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+.product-item {
+  flex: 0 0 ;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.product-image {
+  border: 0;
+  height: 300px;
+  width: 300px;
+}
+
+.product-text {
+  text-align: center; 
+  font-weight: bold;
+}
