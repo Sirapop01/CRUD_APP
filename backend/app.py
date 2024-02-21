@@ -1,14 +1,18 @@
 from flask import Flask,jsonify,request
 from flask_cors import CORS
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+
 app = Flask(__name__)
 CORS(app)
-products=[
-{"id":0,"name":"Notebook Acer Swift","price":45900,"img":"https://img.advice.co.th/images_nas/pic_product4/A0147295/A0147295_s.jpg"},
-{"id":1,"name":"Notebook Asus Vivo","price":19900,"img":"https://img.advice.co.th/images_nas/pic_product4/A0146010/A0146010_s.jpg"},
-{"id":2,"name":"Notebook Lenovo Ideapad","price":32900,"img":"https://img.advice.co.th/images_nas/pic_product4/A0149009/A0149009_s.jpg"},
-{"id":3,"name":"Notebook MSI Prestige","price":54900,"img":"https://img.advice.co.th/images_nas/pic_product4/A0149954/A0149954_s.jpg"},
-{"id":4,"name":"Notebook DELL XPS","price":99900,"img":"https://img.advice.co.th/images_nas/pic_product4/A0146335/A0146335_s.jpg"},
-{"id":5,"name":"Notebook HP Envy","price":46900,"img":"https://img.advice.co.th/images_nas/pic_product4/A0145712/A0145712_s.jpg"}];
+
+uri = "mongodb+srv://products:products123456@cluster0.loxr4ax.mongodb.net/"
+client = MongoClient(uri, server_api = ServerApi('1'))
+client.admin.command('ping')
+db = client["products"]  
+collection = db["pdt_info"]
+
+
 
 @app.route("/")
 def hello_world():
@@ -16,24 +20,42 @@ def hello_world():
 
 @app.route("/products",methods=["GET"])
 def get_all_products():
-    return jsonify(products),200
+    products = collection.find()
+    product_list = [record for record in products]
+    return jsonify(product_list),200
 
 @app.route("/products",methods = ["POST"])
 def create_product():
     data = request.get_json()
-    new_pdt={
-        "id":data["id"],
-        "name":data["name"],
-        "price":data["price"],
-        "img":data["img"]
-    }
     
-    if any(products["id"] == new_pdt["id"] for products in products):
-        return jsonify({"error":"Cannot create new studen"}),500
-    else:
-        products.append(new_pdt)
-        return jsonify(products),200
+    if collection.find_one({"_id": data["_id"]}):
+        return jsonify({"error":"Cannot create new product"}),500
+    collection.insert_one(data)
+    return jsonify({"success":'Record inserted successfully'}),200
 
 
+@app.route("/products/<int:pdt_id>", methods=["PUT"])
+def update_product(pdt_id):
+    data = request.get_json()
+
+    if not collection.find_one({"_id": pdt_id}):
+        return jsonify({'error': f'Record with ID {pdt_id} does not exist'}), 404
+
+    # Exclude the _id field from the update operation
+    data.pop('_id', None)
+
+    filter_criteria = {"_id": pdt_id}
+    update_data = {"$set": data}
+    result = collection.update_one(filter_criteria, update_data)
+
+    return jsonify({
+        'matched_count': result.matched_count,
+        'modified_count': result.modified_count,
+    }), 200
+
+
+@app.route("/products",methods=["Delete"])
+def delete_product():
+    return
 if __name__ == "__main__":
     app.run(host="0.0.0.0",port=5000,debug=True)
