@@ -19,7 +19,7 @@
 ### Frontend:
 - React.js
 - Axios
-- Tailwind CSS + CSS Custom
+- CSS Custom
 - Jest (สำหรับเทส)
 
 ### Backend:
