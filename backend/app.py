@@ -2,12 +2,16 @@ from flask import Flask,jsonify,request
 from flask_cors import CORS
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-uri = "mongodb+srv://products:products123456@cluster0.loxr4ax.mongodb.net/"
-client = MongoClient(uri, server_api = ServerApi('1'))
+uri = os.getenv("MONGODB_URL")
+client = MongoClient(uri, server_api=ServerApi('1'))
 client.admin.command('ping')
 db = client["products"]  
 collection = db["pdt_info"]
